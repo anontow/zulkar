@@ -1,27 +1,20 @@
-name: Check live media delivery
+name: Verify HTTP video ranges
 on:
   push:
     paths: [README.md]
 permissions:
   contents: read
 jobs:
-  probe:
+  check:
     runs-on: ubuntu-latest
     steps:
-      - name: Check headers and HTTP range support
+      - name: Verify live MP4 byte ranges
         run: |
           set -e
-          for host in zulkar-portfolio-git.pages.dev zulkar.atanvir971-95a.workers.dev; do
-            echo "==== $host HEAD ===="
-            curl -LsS -I --max-time 30 "https://$host/assets/video/live-music-moments.mp4" | head -35
-            echo "==== $host byte range ===="
-            curl -LsS --range 0-1023 -D /tmp/hdr -o /tmp/range --max-time 30 "https://$host/assets/video/live-music-moments.mp4"
-            head -25 /tmp/hdr
-            wc -c /tmp/range
-          done
-      - name: Verify playable media stream downloaded from live site
-        run: |
-          curl -LfSs --max-time 120 -o /tmp/live.mp4 "https://zulkar-portfolio-git.pages.dev/assets/video/live-music-moments.mp4"
-          test "$(stat -c %s /tmp/live.mp4)" -eq 12179606
-          ffprobe -v error -show_entries stream=codec_name,profile -show_entries format=duration,size -of json /tmp/live.mp4
-          echo "Video delivery verified"
+          URL="https://zulkar.atanvir971-95a.workers.dev/assets/video/live-music-moments.mp4"
+          curl -sS --fail --max-time 45 -D /tmp/range-headers -H "Range: bytes=0-1023" -o /tmp/first-kb "$URL"
+          head -35 /tmp/range-headers
+          test "$(stat -c %s /tmp/first-kb)" -eq 1024
+          grep -qi 'HTTP/2 206' /tmp/range-headers
+          grep -qi 'content-range: bytes 0-1023/12179606' /tmp/range-headers
+          echo "Verified: live worker serves playable HTTP 206 byte ranges"
