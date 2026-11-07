@@ -5,3 +5,5 @@ Source for Zulkar's portfolio. The website is currently hosted at https://zulkar
 The project is a static HTML/CSS/JavaScript site with photos and videos. This repository is for deploying its site assets.
 
 The verified portfolio import runs automatically from this README update.
+
+Retry import with compatible gdown version.
