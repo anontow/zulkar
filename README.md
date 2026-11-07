@@ -13,3 +13,5 @@ Cloudflare Pages automatically deploys the site from the main branch.
 Using an optimized AAC-LC MP4 for the fifth video.
 
 Deployment verification: live video availability checked from GitHub Actions.
+
+Video stream supports HTTP byte-range requests at the original Worker URL.
