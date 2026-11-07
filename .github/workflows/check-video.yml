@@ -1,0 +1,27 @@
+name: Check live media delivery
+on:
+  push:
+    paths: [README.md]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check headers and HTTP range support
+        run: |
+          set -e
+          for host in zulkar-portfolio-git.pages.dev zulkar.atanvir971-95a.workers.dev; do
+            echo "==== $host HEAD ===="
+            curl -LsS -I --max-time 30 "https://$host/assets/video/live-music-moments.mp4" | head -35
+            echo "==== $host byte range ===="
+            curl -LsS --range 0-1023 -D /tmp/hdr -o /tmp/range --max-time 30 "https://$host/assets/video/live-music-moments.mp4"
+            head -25 /tmp/hdr
+            wc -c /tmp/range
+          done
+      - name: Verify playable media stream downloaded from live site
+        run: |
+          curl -LfSs --max-time 120 -o /tmp/live.mp4 "https://zulkar-portfolio-git.pages.dev/assets/video/live-music-moments.mp4"
+          test "$(stat -c %s /tmp/live.mp4)" -eq 12179606
+          ffprobe -v error -show_entries stream=codec_name,profile -show_entries format=duration,size -of json /tmp/live.mp4
+          echo "Video delivery verified"
