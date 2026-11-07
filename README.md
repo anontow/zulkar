@@ -7,3 +7,5 @@ The project is a static HTML/CSS/JavaScript site with photos and videos. This re
 The verified portfolio import runs automatically from this README update.
 
 Retry import with compatible gdown version.
+
+Cloudflare Pages automatically deploys the site from the main branch.
